@@ -43,10 +43,11 @@ jobs:
           echo "lib files:"
           ls -la "$PROJECT_DIR/lib" || true
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+- name: Setup Flutter
+  uses: subosito/flutter-action@v2
+  with:
+    flutter-version: '3.35.7'
+    channel: stable
 
       - name: Flutter version
         run: flutter --version
