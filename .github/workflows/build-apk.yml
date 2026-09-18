@@ -18,8 +18,15 @@ jobs:
           java-version: '17'
 
       - name: Extract MRSS source
+        shell: bash
         run: |
           ZIP_FILE=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERROR: MRSS ZIP not found"
+            exit 1
+          fi
+
           echo "ZIP: $ZIP_FILE"
 
           mkdir -p mrss_source
@@ -29,7 +36,6 @@ jobs:
 
           if [ -z "$PUBSPEC" ]; then
             echo "ERROR: pubspec.yaml not found"
-            find mrss_source -maxdepth 4 -type f | head -100
             exit 1
           fi
 
@@ -38,17 +44,10 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-          echo "Project files:"
-          ls -la "$PROJECT_DIR"
-          echo "lib files:"
-          ls -la "$PROJECT_DIR/lib" || true
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
           flutter-version: '3.35.7'
-          
 
       - name: Flutter version
         run: flutter --version
@@ -56,12 +55,6 @@ jobs:
       - name: Get dependencies
         working-directory: ${{ env.PROJECT_DIR }}
         run: flutter pub get
-
-      - name: Check Flutter entry point
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: |
-          test -f lib/main.dart
-          echo "Found lib/main.dart"
 
       - name: Build APK
         working-directory: ${{ env.PROJECT_DIR }}
