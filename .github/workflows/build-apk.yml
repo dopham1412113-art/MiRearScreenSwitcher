@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Java 17
@@ -16,6 +16,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Extract MRSS source
+        run: |
+          unzip -q MiRearScreenSwitcher-main.zip
+          cd MiRearScreenSwitcher-main
+          echo "PROJECT_DIR=$PWD" >> "$GITHUB_ENV"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -26,14 +32,16 @@ jobs:
         run: flutter --version
 
       - name: Get dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
         run: flutter pub get
 
       - name: Build APK
+        working-directory: ${{ env.PROJECT_DIR }}
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MRSS-release
-          path: build/app/outputs/flutter-apk/*.apk
+          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
